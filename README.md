@@ -1,0 +1,8 @@
+- Combine common s2t and t2s functions
+- Get on github
+- Be able to run in both text and voice mode
+- Create an asynchronous API caller with jobs and workers
+- Get end-of-speech detection working
+- Fix the key capture (or remove the need for key capture) in gab room
+- Make the story interruptable, especially by voice
+- Create a top-level menu for room, story, and any future options

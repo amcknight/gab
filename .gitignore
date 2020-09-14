@@ -1,0 +1,5 @@
+.idea
+venv
+gab.iml
+**/__pycache__
+**/.DS_Store
