@@ -43,13 +43,6 @@ async def ask_yesno(question):
             return False
 
 
-def get_tags(text):
-    if text[-4:] == " and":
-        text = text[-4:]
-    tags = text.split(" and ")
-    return tags
-
-
 async def storytime():
     # speak("Welcome to story time! Name some things to include in your story:", "en-US", "story/res/intro.mp3")
     await play("story/res/intro.mp3")

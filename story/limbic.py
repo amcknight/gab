@@ -36,10 +36,9 @@ class Limbic(pykka.ThreadingActor):
 
     def heard(self, mp3_path):
         print("heard " + mp3_path)
-        if mp3_path == self.tag_audio_path + ".mp3":
-            print("NEED TO PROCESS TAGS HERE")
         worker = pykka.ActorRegistry.get_by_class_name("Worker")[0]
-        worker.tell(("s2t", mp3_path))
+        if mp3_path == self.tag_audio_path + ".mp3":
+            worker.tell(("s2t", mp3_path))
 
     def said(self, mp3_path):
         print("said " + mp3_path)
@@ -48,7 +47,18 @@ class Limbic(pykka.ThreadingActor):
         print(text + " --> " + mp3_path)
 
     def interpreted(self, mp3_path, text):
+        print("Interpreted: " + mp3_path + ", " + text)
+        if mp3_path == self.tag_audio_path + ".mp3":
+            self.set_tags(text)
         print(mp3_path + " --> " + text)
 
     def confabulated(self, prompt, text):
         pass
+
+    def set_tags(self, text):
+        if self.tags:
+            raise Exception("Trying to set tags when already set")
+
+        if text[-4:] == " and":
+            text = text[-4:]
+        self.tags = text.split(" and ")
