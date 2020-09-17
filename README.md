@@ -9,9 +9,6 @@ Requires an OpenAI API key as an ENV var. If you use this, and you shouldn't bec
 - Get end-of-speech detection working
 - Fix the key capture (or remove the need for key capture) in gab room
 - Make the story interruptable, especially by voice
-### Sane Architecture
-- Parallelize all processes except speaking and listening
-- Refactor to Actor Model
 ### Other
 - Use grammarless speech to text for getting tags
 - Combine common s2t and t2s functions
@@ -21,3 +18,4 @@ Requires an OpenAI API key as an ENV var. If you use this, and you shouldn't bec
 # Changelog
 Unreleased
   - Remove .wav files after .mp3s are created
+  - Refactored to the Actor Model
