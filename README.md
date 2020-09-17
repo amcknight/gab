@@ -15,6 +15,8 @@ Requires an OpenAI API key as an ENV var. If you sue this, and you shouldn't bec
 ### Other
 - Use grammarless speech to text for getting tags
 - Combine common s2t and t2s functions
+- Create tags module
+- Create Message objects instead of strings
 
 # Changelog
 Unreleased

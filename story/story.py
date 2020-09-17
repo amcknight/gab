@@ -15,16 +15,6 @@ async def complete_sentences(prompt, tokens):
     return response[:-len(ending)]
 
 
-def andify(tags):
-    if len(tags) == 0:
-        return ""
-    if len(tags) == 1:
-        return tags[0]
-    tags2 = tags.copy()
-    tags2[-1] = "and " + tags[-1]
-    return ", ".join(tags2)
-
-
 def get_prompt(tags):
     with open("story/res/tag2prompt.txt") as t2p_file:
         data = t2p_file.read()
