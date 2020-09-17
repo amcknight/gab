@@ -4,13 +4,15 @@ Requires an OpenAI API key as an ENV var. If you use this, and you shouldn't bec
 
 # To Do
 ### Nice interface
+- Complete the non-happy path options
 - Be able to run in both text and voice mode
 - Create a top-level menu for room, story, and any future options
 - Get end-of-speech detection working
 - Fix the key capture (or remove the need for key capture) in gab room
-- Make the story interruptable, especially by voice
+- Make the story interruptable and restartable, especially by voice
 ### Other
-- Use grammarless speech to text for getting tags
+- Use grammarless speech to text for getting tags and yes-no answers
+- Use multiple voices for menus vs story
 - Combine common s2t and t2s functions
 - Create tags module
 - Create Message objects instead of strings

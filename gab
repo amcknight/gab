@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 
-import asyncio
 from room import room
-from story import story, story
+from story import story
 
 if __name__ == "__main__":
     story.run()
-    # asyncio.run(story.storytime())
     # initial_lines = room.setup()
     # room.chat(initial_lines)

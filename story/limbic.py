@@ -1,8 +1,9 @@
 import pykka
+import logging
+from story.message import *
 
-"""Orchestrates the actions of the Cortex and Face"""
+# Orchestrates the actions of the Cortex and Face
 class Limbic(pykka.ThreadingActor):
-
     tags = None
     tag_confirmation_text = None
     tags_confirmed = False
@@ -15,147 +16,145 @@ class Limbic(pykka.ThreadingActor):
     yesno_audio_path = "story/input_audio/yesno"
     pages = []
 
-    def on_receive(self, message):
-        cmd, msg = message
-        if cmd == "go":
-            self.go()
-        elif cmd == "prompt":
-            self.prompt()
-        elif cmd == "story":
-            self.story()
-        elif cmd == "heard":
-            id, mp3_path = msg
-            self.heard(id, mp3_path)
-        elif cmd == "said":
-            id, mp3_path = msg
-            self.said(id, mp3_path)
-        elif cmd == "composed":
-            id, text, mp3_path = msg
-            self.composed(id, text, mp3_path)
-        elif cmd == "interpreted":
-            id, mp3_path, text = msg
-            self.interpreted(id, mp3_path, text)
-        elif cmd == "confabulated":
-            id, prompt, text = msg
-            self.confabulated(id, prompt, text)
+    def on_receive(self, msg):
+        logging.debug("Received: " + str(msg))
+        if isinstance(msg, Go):
+            self.go(msg)
+        elif isinstance(msg, Prompt):
+            self.prompt(msg)
+        elif isinstance(msg, Story):
+            self.story(msg)
+        elif isinstance(msg, Heard):
+            self.heard(msg)
+        elif isinstance(msg, Said):
+            self.said(msg)
+        elif isinstance(msg, Composed):
+            self.composed(msg)
+        elif isinstance(msg, Interpreted):
+            self.interpreted(msg)
+        elif isinstance(msg, Confabulated):
+            self.confabulated(msg)
         else:
-            raise Exception("Unknown Limbic command: " + cmd)
+            raise Exception("Unknown Limbic command: " + str(msg))
 
-    def go(self):
+    def go(self, msg):
         face = pykka.ActorRegistry.get_by_class_name("Face")[0]
-        face.tell(("say", ("intro", "story/res/intro.mp3")))
-        face.tell(("hear", ("get_tags", 5)))
+        face.tell(Say("intro", "story/res/intro.mp3"))
+        face.tell(Hear("get_tags", 5))
 
-    def prompt(self):
+    def prompt(self, msg):
         if self.prompt_path:
             self.pages.append(self.prompt_text)
             face = pykka.ActorRegistry.get_by_class_name("Face")[0]
             worker = pykka.ActorRegistry.get_by_class_name("Worker")[0]
-            face.tell(("say", ("first_page", self.prompt_path)))
-            face.tell(("say", ("continue", "story/res/continue.mp3")))
-            face.tell(("hear", ("prompt_confirmation", 2)))
-            worker.tell(("complete", ("page", "".join(self.pages), 200)))
+            face.tell(Say("first_page", self.prompt_path))
+            face.tell(Say("continue", "story/res/continue.mp3"))
+            face.tell(Hear("prompt_confirmation", 2))
+            worker.tell(Complete("page", "".join(self.pages), 200))
         else:
-            self.actor_ref.tell(("prompt", None))
+            self.actor_ref.tell(msg)
 
-    def story(self):
+    def story(self, msg):
         if self.prompt_confirmed:
             face = pykka.ActorRegistry.get_by_class_name("Face")[0]
-            face.tell(("say", (id, self.story_start_path)))
+            face.tell(Say(msg.name, self.story_start_path))
         else:
-            self.actor_ref.tell(("story", self.story_start_path))
+            self.actor_ref.tell(msg)
 
-
-    def heard(self, id, mp3_path):
+    def heard(self, msg):
         worker = pykka.ActorRegistry.get_by_class_name("Worker")[0]
-        if id == "get_tags":
-            worker.tell(("s2t", ("get_tags", mp3_path)))
-        elif id == "tag_confirmation":
-            worker.tell(("s2t", ("tag_confirmation", mp3_path)))
-        elif id == "prompt_confirmation":
-            worker.tell(("s2t", ("prompt_confirmation", mp3_path)))
+        if msg.named("get_tags"):
+            worker.tell(SpeechToText("get_tags", msg.mp3_path))
+        elif msg.named("tag_confirmation"):
+            worker.tell(SpeechToText("tag_confirmation", msg.mp3_path))
+        elif msg.named("prompt_confirmation"):
+            worker.tell(SpeechToText("prompt_confirmation", msg.mp3_path))
         else:
             raise Exception("An unknown thing was heard! Creeeepy.")
 
-    def said(self, id, mp3_path):
-        if id == "page":
+    def said(self, msg):
+        if msg.named("page"):
             worker = pykka.ActorRegistry.get_by_class_name("Worker")[0]
-            worker.tell(("complete", ("page", "".join(self.pages), 200)))
+            worker.tell(Complete("page", "".join(self.pages), 200))
         else:
             pass
 
-    def composed(self, id, text, mp3_path):
+    def composed(self, msg):
         face = pykka.ActorRegistry.get_by_class_name("Face")[0]
-        if id == "tag_confirmation":
+        path = msg.mp3_path
+        name = msg.name
+        if msg.named("tag_confirmation"):
             if self.tags_confirmed:
                 raise Exception("Trying to confirm tags after they've been confirmed")
 
-            face.tell(("say", (id, mp3_path)))
-            face.tell(("hear", ("tag_confirmation", 2)))
-        elif id == "story_prompt":
+            face.tell(Say(name, path))
+            face.tell(Hear("tag_confirmation", 2))
+        elif msg.named("story_prompt"):
             if self.prompt_path:
                 raise Exception("Trying to generate story prompt audio when it already exists")
 
-            self.prompt_path = mp3_path
-        elif id == "first_page":
-            self.story_start_path = mp3_path
-        elif id == "page":
-            face.tell(("say", (id, mp3_path)))
+            self.prompt_path = path
+        elif msg.named("first_page"):
+            self.story_start_path = path
+        elif msg.named("page"):
+            face.tell(Say(name, path))
         else:
-            raise Exception("Unknown text was converted into audio")
+            raise Exception("Unknown text was converted into audio, named: " + name)
 
-    def interpreted(self, id, mp3_path, text):
-        if id == "get_tags":
+    def interpreted(self, msg):
+        text = msg.text
+        if msg.named("get_tags"):
             if not text or text == "":
-                self.actor_ref.tell(("go", None))
+                self.actor_ref.tell(Go("retry"))
             else:
                 self.set_tags(text)
                 worker = pykka.ActorRegistry.get_by_class_name("Worker")[0]
-                worker.tell(("t2s", ("tag_confirmation", self.tag_confirmation_text)))
-                worker.tell(("complete", ("tag_prompt", self.get_prompt(), 100)))
-        elif id == "tag_confirmation":
+                worker.tell(TextToSpeech("tag_confirmation", self.tag_confirmation_text))
+                worker.tell(Complete("tag_prompt", self.get_prompt(), 100))
+        elif msg.named("tag_confirmation"):
             if self.tags_confirmed:
                 raise Exception("Trying to confirm tags after they've been confirmed")
 
             if text == "Yes.":
                 self.tags_confirmed = True
-                self.actor_ref.tell(("prompt", None))
+                self.actor_ref.tell(Prompt(""))
             elif text == "No.":
                 raise Exception("You can't SAY no to ME!!")
             else:
                 face = pykka.ActorRegistry.get_by_class_name("Face")[0]
-                face.tell(("say", ("tag_confirmation", mp3_path)))
-                face.tell(("hear", ("tag_confirmation", 2)))
-        elif id == "prompt_confirmation":
+                face.tell(Say("tag_confirmation", msg.mp3_path))
+                face.tell(Hear("tag_confirmation", 2))
+        elif msg.named("prompt_confirmation"):
             if self.prompt_confirmed:
                 raise Exception("Trying to confirm prompt after it's been confirmed")
 
             if text == "Yes.":
                 self.prompt_confirmed = True
-                self.actor_ref.tell(("story", None))
+                self.actor_ref.tell(Story(""))
             elif text == "No.":
                 raise Exception("You can't SAY no to ME!!!")
             else:
                 face = pykka.ActorRegistry.get_by_class_name("Face")[0]
-                face.tell(("say", ("prompt_confirmation", mp3_path)))
-                face.tell(("hear", ("prompt_confirmation", 2)))
+                face.tell(Say("prompt_confirmation", msg.mp3_path))
+                face.tell(Hear("prompt_confirmation", 2))
         else:
             raise Exception("Interpreted some unknown audio... voice in my head?")
 
-    def confabulated(self, id, prompt, text):
+    def confabulated(self, msg):
+        text = msg.text
         worker = pykka.ActorRegistry.get_by_class_name("Worker")[0]
-        if id == "tag_prompt":
+        if msg.named("tag_prompt"):
             if self.prompt_text:
                 raise Exception("Trying to set prompt text when it already exists")
 
             self.prompt_text = text
-            worker.tell(("t2s", ("story_prompt", text)))
-        elif id == "first_page":
+            worker.tell(TextToSpeech("story_prompt", text))
+        elif msg.named("first_page"):
             self.story_start_text = text
-            worker.tell(("t2s", (id, text)))
-        elif id == "page":
+            worker.tell(TextToSpeech(msg.name, text))
+        elif msg.named("page"):
             self.pages.append(text)
-            worker.tell(("t2s", (id, text)))
+            worker.tell(TextToSpeech(msg.name, text))
         else:
             raise Exception("Unknown thing was confabulated. Am I ruminating?")
 
