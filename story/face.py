@@ -7,13 +7,13 @@ from story import mouth
 # Does the sequential outward facing stuff
 class Face(pykka.ThreadingActor):
     def on_receive(self, message):
-        print("Face: " + str(message))
         limbic = pykka.ActorRegistry.get_by_class_name("Limbic")[0]
         cmd, msg = message
         if cmd == "say":
-            mouth.say(msg)
-            limbic.tell(("said", msg))
+            id, mp3_path = msg
+            mouth.say(mp3_path)
+            limbic.tell(("said", (id, mp3_path)))
         elif cmd == "hear":
-            path, sec = msg
-            mp3_path = ear.record(path, sec)
-            limbic.tell(("heard", mp3_path))
+            id, sec = msg
+            mp3_path = ear.record("story/input_audio", sec)
+            limbic.tell(("heard", (id, mp3_path)))

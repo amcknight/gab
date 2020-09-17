@@ -3,6 +3,7 @@ import soundfile as sf
 import pydub
 import os
 import io
+import secrets
 from google.cloud import speech_v1p1beta1
 from google.cloud.speech_v1p1beta1 import enums
 from google.cloud.speech_v1p1beta1 import types
@@ -12,16 +13,19 @@ sd.default.channels=2
 
 client = speech_v1p1beta1.SpeechClient()
 
-def record(name, duration):
+def record(path, duration):
+    name = path + "/" + secrets.token_hex(6)
+    wav_name = name + ".wav"
+    mp3_name = name + ".mp3"
     rate = 44100
-    print("* recording")
+    print("[Start]")
     data = sd.rec(duration*rate, blocking=True)
-    print("* done recording")
-    sf.write(name + ".wav", data, sd.default.samplerate)
-    sound = pydub.AudioSegment.from_wav(name + ".wav")
-    sound.export(name + ".mp3", format="mp3")
-    os.remove(name + ".wav")
-    return name + ".mp3"
+    print("[Stop]")
+    sf.write(wav_name, data, sd.default.samplerate)
+    sound = pydub.AudioSegment.from_wav(wav_name)
+    sound.export(mp3_name, format="mp3")
+    os.remove(wav_name)
+    return mp3_name
 
 def speech_to_text(mp3):
     config = types.RecognitionConfig(
