@@ -3,3 +3,4 @@ venv
 gab.iml
 **/__pycache__
 **/.DS_Store
+story/input_audio

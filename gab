@@ -2,11 +2,10 @@
 
 import asyncio
 from room import room
-from story import story, story2
+from story import story, story
 
 if __name__ == "__main__":
-    g = story2.Greeter.start()
-    g.tell("yo")
+    story.run()
     # asyncio.run(story.storytime())
     # initial_lines = room.setup()
     # room.chat(initial_lines)
