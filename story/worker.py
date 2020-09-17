@@ -12,6 +12,11 @@ class Worker(pykka.ThreadingActor):
             self.s2t(msg)
         elif cmd == "t2s":
             self.t2s(msg)
+        elif cmd == "complete":
+            id, text, tokens = msg
+            self.complete(id, text, tokens)
+        else:
+            raise Exception("Unknown command sent to worker: " + cmd)
 
     def s2t(self, mp3_path):
         text = ear.speech_to_text(mp3_path)
@@ -23,6 +28,7 @@ class Worker(pykka.ThreadingActor):
         limbic = pykka.ActorRegistry.get_by_class_name("Limbic")[0]
         limbic.tell(("composed", (text, mp3_path)))
 
-    def complete(prompt, tokens):
+    def complete(self, id, prompt, tokens):
         response = openai.Completion.create(engine="davinci", prompt=prompt, max_tokens=tokens)
-        return response.choices[0].text
+        limbic = pykka.ActorRegistry.get_by_class_name("Limbic")[0]
+        limbic.tell(("confabulated", (id, prompt, response.choices[0].text)))
