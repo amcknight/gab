@@ -21,3 +21,4 @@ Requires an OpenAI API key as an ENV var. If you use this, and you shouldn't bec
 Unreleased
   - Remove .wav files after .mp3s are created
   - Refactored to the Actor Model
+  - Added Message classes
