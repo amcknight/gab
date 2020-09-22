@@ -1,12 +1,11 @@
 import re
-
 import pykka
 import openai
 from story import ear
 from story import mouth
 from functools import singledispatchmethod
-
 from story.message import *
+from story.directory import limbic
 
 
 # Does the tough long thinky stuff and so needs to be a fleet of concurrent workers
@@ -15,20 +14,18 @@ class Worker(pykka.ThreadingActor):
     def on_receive(self, msg):
         raise Exception("Unknown command sent to worker: " + str(msg))
 
-    @on_receive(SpeechToText)
+    @on_receive.register(SpeechToText)
     def s2t(self, msg):
         text = ear.speech_to_text(msg.mp3_path)
-        limbic = pykka.ActorRegistry.get_by_class_name("Limbic")[0]
-        limbic.tell(Interpreted(msg.name, msg.mp3_path, text))
+        limbic().tell(Interpreted(msg.name, msg.mp3_path, text))
 
-    @on_receive(TextToSpeech)
+    @on_receive.register(TextToSpeech)
     def t2s(self, msg):
         text = msg.text
         mp3_path = mouth.text_to_speech(text, "en-US", "story/input_audio")
-        limbic = pykka.ActorRegistry.get_by_class_name("Limbic")[0]
-        limbic.tell(Composed(msg.name, text, mp3_path))
+        limbic().tell(Composed(msg.name, text, mp3_path))
 
-    @on_receive(Complete)
+    @on_receive.register(Complete)
     def complete(self, msg):
         prompt = msg.prompt
         tokens = msg.tokens
@@ -44,5 +41,4 @@ class Worker(pykka.ThreadingActor):
             print("Empty cleaned completion text. Raw completion length was " + str(len(text)))
             self.actor_ref.tell(Complete(msg.name, prompt, tokens))
         else:
-            limbic = pykka.ActorRegistry.get_by_class_name("Limbic")[0]
-            limbic.tell(Confabulated(msg.name, prompt, clean_text))
+            limbic().tell(Confabulated(msg.name, prompt, clean_text))

@@ -2,13 +2,13 @@
 
 import logging
 from room import room
-from story import story
+from story.head import Head
 from listen import listen
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.WARN)
     logging.getLogger('pykka').setLevel(logging.INFO)
     # listen.run()
-    story.run()
+    Head().run()
     # initial_lines = room.setup()
     # room.chat(initial_lines)
