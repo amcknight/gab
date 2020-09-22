@@ -1,5 +1,5 @@
+from functools import singledispatchmethod
 import pykka
-import logging
 from story.message import *
 
 # Orchestrates the actions of the Cortex and Face
@@ -16,32 +16,17 @@ class Limbic(pykka.ThreadingActor):
     yesno_audio_path = "story/input_audio/yesno"
     pages = []
 
+    @singledispatchmethod
     def on_receive(self, msg):
-        logging.debug("Received: " + str(msg))
-        if isinstance(msg, Go):
-            self.go(msg)
-        elif isinstance(msg, Prompt):
-            self.prompt(msg)
-        elif isinstance(msg, Story):
-            self.story(msg)
-        elif isinstance(msg, Heard):
-            self.heard(msg)
-        elif isinstance(msg, Said):
-            self.said(msg)
-        elif isinstance(msg, Composed):
-            self.composed(msg)
-        elif isinstance(msg, Interpreted):
-            self.interpreted(msg)
-        elif isinstance(msg, Confabulated):
-            self.confabulated(msg)
-        else:
-            raise Exception("Unknown Limbic command: " + str(msg))
+        raise Exception("Unknown Limbic command: " + str(msg))
 
+    @on_receive.register(Go)
     def go(self, msg):
         face = pykka.ActorRegistry.get_by_class_name("Face")[0]
         face.tell(Say("intro", "story/res/intro.mp3"))
         face.tell(Hear("get_tags", 5))
 
+    @on_receive.register(Prompt)
     def prompt(self, msg):
         if self.prompt_path:
             self.pages.append(self.prompt_text)
@@ -54,6 +39,7 @@ class Limbic(pykka.ThreadingActor):
         else:
             self.actor_ref.tell(msg)
 
+    @on_receive.register(Story)
     def story(self, msg):
         if self.prompt_confirmed:
             face = pykka.ActorRegistry.get_by_class_name("Face")[0]
@@ -61,6 +47,7 @@ class Limbic(pykka.ThreadingActor):
         else:
             self.actor_ref.tell(msg)
 
+    @on_receive.register(Heard)
     def heard(self, msg):
         worker = pykka.ActorRegistry.get_by_class_name("Worker")[0]
         if msg.named("get_tags"):
@@ -72,6 +59,7 @@ class Limbic(pykka.ThreadingActor):
         else:
             raise Exception("An unknown thing was heard! Creeeepy.")
 
+    @on_receive.register(Said)
     def said(self, msg):
         if msg.named("page"):
             worker = pykka.ActorRegistry.get_by_class_name("Worker")[0]
@@ -79,6 +67,7 @@ class Limbic(pykka.ThreadingActor):
         else:
             pass
 
+    @on_receive.register(Composed)
     def composed(self, msg):
         face = pykka.ActorRegistry.get_by_class_name("Face")[0]
         path = msg.mp3_path
@@ -101,6 +90,7 @@ class Limbic(pykka.ThreadingActor):
         else:
             raise Exception("Unknown text was converted into audio, named: " + name)
 
+    @on_receive.register(Interpreted)
     def interpreted(self, msg):
         text = msg.text
         if msg.named("get_tags"):
@@ -140,6 +130,7 @@ class Limbic(pykka.ThreadingActor):
         else:
             raise Exception("Interpreted some unknown audio... voice in my head?")
 
+    @on_receive.register(Confabulated)
     def confabulated(self, msg):
         text = msg.text
         worker = pykka.ActorRegistry.get_by_class_name("Worker")[0]

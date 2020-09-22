@@ -74,8 +74,6 @@ class TextToSpeech(Message):
         super().__init__(name)
         self.text = text
 
-        pass
-
 
 class SpeechToText(Message):
     def __init__(self, name, mp3_path):

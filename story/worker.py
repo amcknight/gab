@@ -4,34 +4,31 @@ import pykka
 import openai
 from story import ear
 from story import mouth
+from functools import singledispatchmethod
 
-
-# Does the tough long thinky stuff and so needs to be a fleet of concurrent workers
 from story.message import *
 
 
+# Does the tough long thinky stuff and so needs to be a fleet of concurrent workers
 class Worker(pykka.ThreadingActor):
+    @singledispatchmethod
     def on_receive(self, msg):
-        if isinstance(msg, SpeechToText):
-            self.s2t(msg)
-        elif isinstance(msg, TextToSpeech):
-            self.t2s(msg)
-        elif isinstance(msg, Complete):
-            self.complete(msg)
-        else:
-            raise Exception("Unknown command sent to worker: " + str(msg))
+        raise Exception("Unknown command sent to worker: " + str(msg))
 
+    @on_receive(SpeechToText)
     def s2t(self, msg):
         text = ear.speech_to_text(msg.mp3_path)
         limbic = pykka.ActorRegistry.get_by_class_name("Limbic")[0]
         limbic.tell(Interpreted(msg.name, msg.mp3_path, text))
 
+    @on_receive(TextToSpeech)
     def t2s(self, msg):
         text = msg.text
         mp3_path = mouth.text_to_speech(text, "en-US", "story/input_audio")
         limbic = pykka.ActorRegistry.get_by_class_name("Limbic")[0]
         limbic.tell(Composed(msg.name, text, mp3_path))
 
+    @on_receive(Complete)
     def complete(self, msg):
         prompt = msg.prompt
         tokens = msg.tokens
