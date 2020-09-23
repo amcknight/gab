@@ -1,16 +1,31 @@
-from functools import singledispatchmethod
 import pykka
+from functools import singledispatchmethod
 from story.message import *
 from story.directory import *
+from pysm import State, StateMachine, Event
+
 
 # Orchestrates the actions of the Cortex and Face
 class Limbic(pykka.ThreadingActor):
+    sm = StateMachine('sm')
+    have_none = State('have_none')
+    have_tags = State('have_tags')
+    have_prompt = State('have_prompt')
+    storying = State('storying')
+    sm.add_state(have_none, initial=True)
+    sm.add_state(have_tags)
+    sm.add_state(have_prompt)
+    sm.add_state(storying)
+    sm.add_transition(have_none, have_tags, events=['have_tags'])
+    sm.add_transition(have_tags, have_prompt, events=['have_prompt'])
+    sm.add_transition(have_prompt, storying, events=['storying'])
+    sm.initialize()
+
     tags = None
     tag_confirmation_text = None
-    tags_confirmed = False
+    tag_confirmation_path = None
     prompt_text = None
     prompt_path = None
-    prompt_confirmed = False
     story_start_text = None
     story_start_path = None
     tag_audio_path = "story/input_audio/tag"
@@ -23,8 +38,11 @@ class Limbic(pykka.ThreadingActor):
 
     @on_receive.register(Go)
     def go(self, msg):
-        face().tell(Say("intro", "story/res/intro.mp3"))
-        face().tell(Hear("get_tags", 5))
+        if self.sm.state == self.have_none:
+            face().tell(Say("intro", "story/res/intro.mp3"))
+            face().tell(Hear("get_tags", 5))
+        else:
+            raise Exception("Trying to Go when not on have_none state")
 
     @on_receive.register(Prompt)
     def prompt(self, msg):
@@ -39,7 +57,7 @@ class Limbic(pykka.ThreadingActor):
 
     @on_receive.register(Story)
     def story(self, msg):
-        if self.prompt_confirmed:
+        if self.sm.state == self.have_prompt:
             face().tell(Say(msg.name, self.story_start_path))
         else:
             self.actor_ref.tell(msg)
@@ -67,11 +85,12 @@ class Limbic(pykka.ThreadingActor):
         path = msg.mp3_path
         name = msg.name
         if msg.named("tag_confirmation"):
-            if self.tags_confirmed:
+            if self.sm.state == self.have_tags:
                 raise Exception("Trying to confirm tags after they've been confirmed")
 
+            self.tag_confirmation_path = path
             face().tell(Say(name, path))
-            face().tell(Hear("tag_confirmation", 2))
+            face().tell(Hear(name, 2))
         elif msg.named("story_prompt"):
             if self.prompt_path:
                 raise Exception("Trying to generate story prompt audio when it already exists")
@@ -95,28 +114,28 @@ class Limbic(pykka.ThreadingActor):
                 worker().tell(TextToSpeech("tag_confirmation", self.tag_confirmation_text))
                 worker().tell(Complete("tag_prompt", self.get_prompt(), 100))
         elif msg.named("tag_confirmation"):
-            if self.tags_confirmed:
+            if self.sm.state == self.have_tags:
                 raise Exception("Trying to confirm tags after they've been confirmed")
 
             if text == "Yes.":
-                self.tags_confirmed = True
+                self.sm.dispatch(Event('have_tags'))
                 self.actor_ref.tell(Prompt(""))
             elif text == "No.":
                 raise Exception("You can't SAY no to ME!!")
             else:
-                face().tell(Say("tag_confirmation", msg.mp3_path))
+                face().tell(Say("tag_confirmation", self.tag_confirmation_path))
                 face().tell(Hear("tag_confirmation", 2))
         elif msg.named("prompt_confirmation"):
-            if self.prompt_confirmed:
+            if self.sm.state == self.have_prompt:
                 raise Exception("Trying to confirm prompt after it's been confirmed")
 
             if text == "Yes.":
-                self.prompt_confirmed = True
+                self.sm.dispatch(Event('have_prompt'))
                 self.actor_ref.tell(Story(""))
             elif text == "No.":
                 raise Exception("You can't SAY no to ME!!!")
             else:
-                face().tell(Say("prompt_confirmation", msg.mp3_path))
+                face().tell(Say("prompt_confirmation", "story/res/continue.mp3"))
                 face().tell(Hear("prompt_confirmation", 2))
         else:
             raise Exception("Interpreted some unknown audio... voice in my head?")
