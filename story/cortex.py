@@ -1,14 +1,20 @@
 import re
 import pykka
 import openai
+from functools import singledispatchmethod
 from story import ear
 from story import mouth
-from functools import singledispatchmethod
 from story.message import *
 from story.directory import limbic
+from story.fleet import Fleet
 
 
-# Does the tough long thinky stuff and so needs to be a fleet of concurrent workers
+# Does the tough long thinky stuff
+class Cortex(Fleet):
+    def __init__(self, num):
+        super().__init__(Worker, num)
+
+
 class Worker(pykka.ThreadingActor):
     @singledispatchmethod
     def on_receive(self, msg):

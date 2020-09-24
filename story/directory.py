@@ -10,7 +10,7 @@ def limbic():
 
 
 def cortex():
-    return ActorRegistry.get_by_class_name("Worker")
+    return _first("Cortex")
 
 
 def _first(class_name):

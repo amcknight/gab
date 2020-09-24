@@ -67,7 +67,7 @@ class Confabulated(Message):
         self.text = text
 
 
-# Worker
+# Cortex
 
 class TextToSpeech(Message):
     def __init__(self, name, text):

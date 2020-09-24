@@ -55,7 +55,7 @@ class Limbic(pykka.ThreadingActor):
             face().tell(Say("first_page", self.prompt_path))
             face().tell(Say("continue", "story/res/continue.mp3"))
             face().tell(Hear("prompt_confirmation", 2))
-            worker().tell(Complete("first_page", "".join(self.pages), 200))
+            cortex().tell(Complete("first_page", "".join(self.pages), 200))
         else:
             self.actor_ref.tell(msg)
 
@@ -71,11 +71,11 @@ class Limbic(pykka.ThreadingActor):
     def heard(self, msg):
         self.trace(msg)
         if msg.named("get_tags"):
-            worker().tell(SpeechToText("get_tags", msg.mp3_path))
+            cortex().tell(SpeechToText("get_tags", msg.mp3_path))
         elif msg.named("tag_confirmation"):
-            worker().tell(SpeechToText("tag_confirmation", msg.mp3_path))
+            cortex().tell(SpeechToText("tag_confirmation", msg.mp3_path))
         elif msg.named("prompt_confirmation"):
-            worker().tell(SpeechToText("prompt_confirmation", msg.mp3_path))
+            cortex().tell(SpeechToText("prompt_confirmation", msg.mp3_path))
         else:
             raise Exception("An unknown thing was heard! Creeeepy.")
 
@@ -83,9 +83,9 @@ class Limbic(pykka.ThreadingActor):
     def said(self, msg):
         self.trace(msg)
         if msg.named("first_page"):
-            worker().tell(Complete("page", "".join(self.pages), 200))
+            cortex().tell(Complete("page", "".join(self.pages), 200))
         elif msg.named("page"):
-            worker().tell(Complete("page", "".join(self.pages), 200))
+            cortex().tell(Complete("page", "".join(self.pages), 200))
         else:
             pass
 
@@ -123,8 +123,8 @@ class Limbic(pykka.ThreadingActor):
                 self.actor_ref.tell(Go("retry"))
             else:
                 self.set_tags(text)
-                worker().tell(TextToSpeech("tag_confirmation", self.tag_confirmation_text))
-                worker().tell(Complete("tag_prompt", self.get_prompt(), 100))
+                cortex().tell(TextToSpeech("tag_confirmation", self.tag_confirmation_text))
+                cortex().tell(Complete("tag_prompt", self.get_prompt(), 100))
         elif msg.named("tag_confirmation"):
             if self.sm.state == self.have_tags:
                 raise Exception("Trying to confirm tags after they've been confirmed")
@@ -162,13 +162,13 @@ class Limbic(pykka.ThreadingActor):
                 raise Exception("Trying to set prompt text when it already exists")
 
             self.prompt_text = text
-            worker().tell(TextToSpeech("story_prompt", text))
+            cortex().tell(TextToSpeech("story_prompt", text))
         elif msg.named("first_page"):
             self.story_start_text = text
-            worker().tell(TextToSpeech(name, text))
+            cortex().tell(TextToSpeech(name, text))
         elif msg.named("page"):
             self.pages.append(text)
-            worker().tell(TextToSpeech(name, text))
+            cortex().tell(TextToSpeech(name, text))
         else:
             raise Exception("Unknown thing was confabulated. Am I ruminating?")
 
