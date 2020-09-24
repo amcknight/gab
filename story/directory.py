@@ -9,8 +9,8 @@ def limbic():
     return _first("Limbic")
 
 
-def worker():
-    return _first("Worker")
+def cortex():
+    return ActorRegistry.get_by_class_name("Worker")
 
 
 def _first(class_name):

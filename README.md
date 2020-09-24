@@ -10,6 +10,7 @@ Requires an OpenAI API key as an ENV var. If you use this, and you shouldn't bec
 - Use grammarless speech to text for getting tags and yes-no answers
 - Combine common s2t and t2s functions
 - Clean up old .mp3s
+- Convert this To Do into a versioned Roadmap
 ### Story
 - Complete the non-happy path options
 - Make it interruptable and restartable, especially by voice
