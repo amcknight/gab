@@ -1,4 +1,5 @@
 import pykka
+import logging
 from functools import singledispatchmethod
 from story import ear
 from story import mouth
@@ -15,10 +16,12 @@ class Face(pykka.ThreadingActor):
 
     @on_receive.register(Say)
     def say(self, msg):
+        logging.info(type(msg).__name__ + ", " + msg.name)
         mouth.say(msg.mp3_path)
         limbic().tell(Said(msg.name, msg.mp3_path))
 
     @on_receive.register(Hear)
     def hear(self, msg):
+        logging.info(type(msg).__name__ + ", " + msg.name)
         mp3_path = ear.record("story/input_audio", msg.duration)
         limbic().tell(Heard(msg.name, mp3_path))

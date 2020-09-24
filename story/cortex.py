@@ -1,6 +1,7 @@
 import re
 import pykka
 import openai
+import logging
 from functools import singledispatchmethod
 from story import ear
 from story import mouth
@@ -22,17 +23,20 @@ class Worker(pykka.ThreadingActor):
 
     @on_receive.register(SpeechToText)
     def s2t(self, msg):
+        logging.info(type(msg).__name__ + ", " + msg.name)
         text = ear.speech_to_text(msg.mp3_path)
         limbic().tell(Interpreted(msg.name, msg.mp3_path, text))
 
     @on_receive.register(TextToSpeech)
     def t2s(self, msg):
+        logging.info(type(msg).__name__ + ", " + msg.name)
         text = msg.text
         mp3_path = mouth.text_to_speech(text, "en-US", "story/input_audio")
         limbic().tell(Composed(msg.name, text, mp3_path))
 
     @on_receive.register(Complete)
     def complete(self, msg):
+        logging.info(type(msg).__name__ + ", " + msg.name)
         prompt = msg.prompt
         tokens = msg.tokens
         response = openai.Completion.create(engine="davinci", prompt=prompt, max_tokens=tokens)

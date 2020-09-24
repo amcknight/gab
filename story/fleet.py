@@ -12,5 +12,4 @@ class Fleet(ThreadingActor):
     def on_receive(self, msg):
         self.num_msgs += 1
         index = self.num_msgs % self.num
-        print("Fleet Receive " + str(index))
         self.actors[index].tell(msg)
