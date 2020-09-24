@@ -1,4 +1,4 @@
-Version 0.0... ...0.0.1 (Not useful for anyone)
+Version 0.0.1
 
 Requires an OpenAI API key as an ENV var. If you use this, and you shouldn't because it doesn't really work yet, then please take full responsibility under [OpenAI's usage guide](https://beta.openai.com/docs/going-live). The code will need to be modified to fulfill OpenAI's guidelines.
 
@@ -9,6 +9,7 @@ Requires an OpenAI API key as an ENV var. If you use this, and you shouldn't bec
 - Get end-of-speech detection working
 - Use grammarless speech to text for getting tags and yes-no answers
 - Combine common s2t and t2s functions
+- Clean up old .mp3s
 ### Story
 - Complete the non-happy path options
 - Make it interruptable and restartable, especially by voice
@@ -23,3 +24,4 @@ Requires an OpenAI API key as an ENV var. If you use this, and you shouldn't bec
   - Refactored to the Actor Model
   - Added Message classes
   - Used dispatcher decorators, a directory, and a "Head" object to organize code
+  - Added a state machine for limbic
