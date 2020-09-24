@@ -1,3 +1,5 @@
+import logging
+
 import pykka
 from functools import singledispatchmethod
 from story.message import *
@@ -38,6 +40,7 @@ class Limbic(pykka.ThreadingActor):
 
     @on_receive.register(Go)
     def go(self, msg):
+        self.trace(msg)
         if self.sm.state == self.have_none:
             face().tell(Say("intro", "story/res/intro.mp3"))
             face().tell(Hear("get_tags", 5))
@@ -46,24 +49,27 @@ class Limbic(pykka.ThreadingActor):
 
     @on_receive.register(Prompt)
     def prompt(self, msg):
+        self.trace(msg)
         if self.prompt_path:
             self.pages.append(self.prompt_text)
             face().tell(Say("first_page", self.prompt_path))
             face().tell(Say("continue", "story/res/continue.mp3"))
             face().tell(Hear("prompt_confirmation", 2))
-            worker().tell(Complete("page", "".join(self.pages), 200))
+            worker().tell(Complete("first_page", "".join(self.pages), 200))
         else:
             self.actor_ref.tell(msg)
 
     @on_receive.register(Story)
     def story(self, msg):
-        if self.sm.state == self.have_prompt:
+        self.trace(msg)
+        if self.story_start_path:
             face().tell(Say(msg.name, self.story_start_path))
         else:
             self.actor_ref.tell(msg)
 
     @on_receive.register(Heard)
     def heard(self, msg):
+        self.trace(msg)
         if msg.named("get_tags"):
             worker().tell(SpeechToText("get_tags", msg.mp3_path))
         elif msg.named("tag_confirmation"):
@@ -75,13 +81,17 @@ class Limbic(pykka.ThreadingActor):
 
     @on_receive.register(Said)
     def said(self, msg):
-        if msg.named("page"):
+        self.trace(msg)
+        if msg.named("first_page"):
+            worker().tell(Complete("page", "".join(self.pages), 200))
+        elif msg.named("page"):
             worker().tell(Complete("page", "".join(self.pages), 200))
         else:
             pass
 
     @on_receive.register(Composed)
     def composed(self, msg):
+        self.trace(msg)
         path = msg.mp3_path
         name = msg.name
         if msg.named("tag_confirmation"):
@@ -99,12 +109,14 @@ class Limbic(pykka.ThreadingActor):
         elif msg.named("first_page"):
             self.story_start_path = path
         elif msg.named("page"):
-            face().tell(Say(name, path))
+            if self.sm.state == self.storying:
+                face().tell(Say(name, path))
         else:
             raise Exception("Unknown text was converted into audio, named: " + name)
 
     @on_receive.register(Interpreted)
     def interpreted(self, msg):
+        self.trace(msg)
         text = msg.text
         if msg.named("get_tags"):
             if not text or text == "":
@@ -142,7 +154,9 @@ class Limbic(pykka.ThreadingActor):
 
     @on_receive.register(Confabulated)
     def confabulated(self, msg):
+        self.trace(msg)
         text = msg.text
+        name = msg.name
         if msg.named("tag_prompt"):
             if self.prompt_text:
                 raise Exception("Trying to set prompt text when it already exists")
@@ -151,10 +165,10 @@ class Limbic(pykka.ThreadingActor):
             worker().tell(TextToSpeech("story_prompt", text))
         elif msg.named("first_page"):
             self.story_start_text = text
-            worker().tell(TextToSpeech(msg.name, text))
+            worker().tell(TextToSpeech(name, text))
         elif msg.named("page"):
             self.pages.append(text)
-            worker().tell(TextToSpeech(msg.name, text))
+            worker().tell(TextToSpeech(name, text))
         else:
             raise Exception("Unknown thing was confabulated. Am I ruminating?")
 
@@ -181,3 +195,6 @@ class Limbic(pykka.ThreadingActor):
             data = t2p_file.read()
 
         return data + "\n\n[tags] " + ", ".join(self.tags) + "\n[prompt]"
+
+    def trace(self, msg):
+        logging.warning(type(msg).__name__ + ", " + msg.name + ", " + self.sm.state.name)
