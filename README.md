@@ -27,3 +27,4 @@ Requires an OpenAI API key as an ENV var. If you use this, and you shouldn't bec
   - Used dispatcher decorators, a directory, and a "Head" object to organize code
   - Added a state machine for limbic
   - Made the Worker into a Fleet called a Cortex
+  - Added logging

@@ -3,7 +3,6 @@
 import logging
 from room import room
 from story.head import Head
-from listen import listen
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
