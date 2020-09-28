@@ -11,11 +11,15 @@ Requires an OpenAI API key as an ENV var. If you use this, and you shouldn't bec
 - Combine common s2t and t2s functions
 - Clean up old .mp3s
 - Convert this To Do into a versioned Roadmap
+- Automatically cache text to speech requests to google
 ### Story
 - Complete the non-happy path options
 - Make it interruptable and restartable, especially by voice
 - Use multiple voices for menus vs story
 - Make story able to continue indefinitely using maximum prompt length
+### Pykka + FSM + Events + Decorators
+- Create a decorator for Events+State
+- Split out into a library
 ### Room
 - Fix the key capture (or remove the need for key capture)
 

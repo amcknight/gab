@@ -1,10 +1,19 @@
 import functools
+import logging
+
+dispatcher = {}
 
 
-def on(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        value = func(*args, **kwargs)
-        return value
+def on(event_type=None, event_name=None, state=None):
+    def dec(func):
+        dispatcher[(event_type, event_name, state)] = func
 
-    return wrapper
+        @functools.wraps(func)
+        def wrapper(event):
+            # TODO: Should be able to pass in log level
+            logging.info(type(event).__name__ + ", " + event.name + ", " + state.name)
+            return func(event)
+
+        return wrapper
+
+    return dec

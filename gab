@@ -5,9 +5,9 @@ from room import room
 from story.head import Head
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.WARN)
     logging.getLogger('pykka').setLevel(logging.INFO)
-    logging.getLogger('openai').setLevel(logging.WARNING)
+    logging.getLogger('openai').setLevel(logging.WARN)
     Head().run()
     # initial_lines = room.setup()
     # room.chat(initial_lines)
