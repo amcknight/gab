@@ -1,4 +1,4 @@
-from pykkachu import *
+from pykkachu.actor import *
 from story.message import *
 from story.directory import *
 from pysm import State, Event

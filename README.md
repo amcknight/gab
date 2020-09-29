@@ -17,18 +17,18 @@ Requires an OpenAI API key as an ENV var. If you use this, and you shouldn't bec
 - Make it interruptable and restartable, especially by voice
 - Use multiple voices for menus vs story
 - Make story able to continue indefinitely using maximum prompt length
-### Pykka + FSM + Events + Decorators
-- Create a decorator for Events+State
-- Split out into a library
 ### Room
 - Fix the key capture (or remove the need for key capture)
 
 # Changelog
 ### Unreleased
-  - Remove .wav files after .mp3s are created
-  - Refactored to the Actor Model
-  - Added Message classes
-  - Used dispatcher decorators, a directory, and a "Head" object to organize code
-  - Added a state machine for limbic
-  - Made the Worker into a Fleet called a Cortex
-  - Added logging
+- Remove .wav files after .mp3s are created
+- Refactored to the Actor Model
+- Added Message classes
+- Used dispatcher decorators, a directory, and a "Head" object to organize code
+- Added a state machine for limbic
+- Made the Worker into a Fleet called a Cortex
+- Added logging
+- Created a decorator for Events+State
+- Separated generic pykka extensions into a pykkachu file
+- Split out the generic pykka extension into a library and importing it

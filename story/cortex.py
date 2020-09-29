@@ -3,11 +3,11 @@ import pykka
 import openai
 import logging
 from functools import singledispatchmethod
+from pykkachu.fleet import Fleet
 from story import ear
 from story import mouth
 from story.message import *
 from story.directory import limbic
-from pykkachu import Fleet
 
 
 # Does the tough long thinky stuff

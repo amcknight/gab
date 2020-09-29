@@ -1,0 +1,24 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[[source]]
+name = "pypi-test"
+url = "https://test.pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+pykka = "*"
+openai = "*"
+sounddevice = "*"
+soundfile = "*"
+pydub = "*"
+google.cloud = "*"
+#google.cloud.speech_v1p1beta1 = "*"
+pykkachu = {version="*", index="pypi-test"}
+
+[requires]
+python_version = "3"

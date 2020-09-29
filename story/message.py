@@ -1,9 +1,5 @@
-class Message:
-    def __init__(self, name):
-        self.name = name
+from pykkachu.message import Message
 
-    def named(self, name):
-        return name == self.name
 
 # Face
 
@@ -86,4 +82,3 @@ class Complete(Message):
         super().__init__(name)
         self.prompt = prompt
         self.tokens = tokens
-
