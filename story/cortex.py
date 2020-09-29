@@ -7,7 +7,7 @@ from story import ear
 from story import mouth
 from story.message import *
 from story.directory import limbic
-from story.fleet import Fleet
+from pykkachu import Fleet
 
 
 # Does the tough long thinky stuff
@@ -48,7 +48,7 @@ class Worker(pykka.ThreadingActor):
         clean_text = clean_text.split("[prompt]")[0]
         clean_text.strip()
         if clean_text == "":
-            print("Empty cleaned completion text. Raw completion length was " + str(len(text)))
+            logging.warning("Empty cleaned completion text. Raw completion length was " + str(len(text)))
             self.actor_ref.tell(Complete(msg.name, prompt, tokens))
         else:
             limbic().tell(Confabulated(msg.name, prompt, clean_text))

@@ -1,30 +1,11 @@
-import logging
-
-import pykka
-from functools import singledispatchmethod
-
-from story.decorators import *
+from pykkachu import *
 from story.message import *
 from story.directory import *
-from pysm import State, StateMachine, Event
+from pysm import State, Event
 
 
 # Orchestrates the actions of the Cortex and Face
-class Limbic(pykka.ThreadingActor):
-    sm = StateMachine('sm')
-    have_none = State('have_none')
-    have_tags = State('have_tags')
-    have_prompt = State('have_prompt')
-    storying = State('storying')
-    sm.add_state(have_none, initial=True)
-    sm.add_state(have_tags)
-    sm.add_state(have_prompt)
-    sm.add_state(storying)
-    sm.add_transition(have_none, have_tags, events=['have_tags'])
-    sm.add_transition(have_tags, have_prompt, events=['have_prompt'])
-    sm.add_transition(have_prompt, storying, events=['storying'])
-    sm.initialize()
-
+class Limbic(Actor):
     tags = None
     tag_confirmation_text = None
     tag_confirmation_path = None
@@ -35,6 +16,22 @@ class Limbic(pykka.ThreadingActor):
     tag_audio_path = "story/input_audio/tag"
     yesno_audio_path = "story/input_audio/yesno"
     pages = []
+
+    have_none = State('have_none')
+    have_tags = State('have_tags')
+    have_prompt = State('have_prompt')
+    storying = State('storying')
+
+    def __init__(self):
+        super().__init__()
+        self.sm.add_state(self.have_none, initial=True)
+        self.sm.add_state(self.have_tags)
+        self.sm.add_state(self.have_prompt)
+        self.sm.add_state(self.storying)
+        self.sm.add_transition(self.have_none, self.have_tags, events=['have_tags'])
+        self.sm.add_transition(self.have_tags, self.have_prompt, events=['have_prompt'])
+        self.sm.add_transition(self.have_prompt, self.storying, events=['storying'])
+        self.sm.initialize()
 
     @on()
     def unknown(self, event, state):
@@ -168,18 +165,15 @@ class Limbic(pykka.ThreadingActor):
             face().tell(Say("prompt_confirmation", "story/res/continue.mp3"))
             face().tell(Hear("prompt_confirmation", 2))
 
-
     @on(Interpreted)
     def interpreted(self, event):
         raise Exception("Interpreted some unknown audio... voice in my head?")
 
-
-    @on(Confabulated, "tag_prompt", prompt_text)
-    def confabulated_tag_prompt_again(self, event):
-        raise Exception("Trying to set prompt text when it already exists")
-
     @on(Confabulated, "tag_prompt")
     def confabulated_tag_prompt(self, event):
+        if self.prompt_text:
+            raise Exception("Trying to set prompt text when it already exists")
+
         self.prompt_text = event.text
         cortex().tell(TextToSpeech("story_prompt", event.text))
 
