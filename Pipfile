@@ -11,14 +11,19 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-pykka = "*"
+google-cloud-speech = "*"
+google-cloud-texttospeech = "*"
+numpy = "*"
 openai = "*"
+playsound = "*"
+pyaudio = "*"
+pydub = "*"
+pykka = "*"
+pykkachu = {version="*", index="pypi-test"}
+pynput = "*"
+pysm = "*"
 sounddevice = "*"
 soundfile = "*"
-pydub = "*"
-google.cloud = "*"
-#google.cloud.speech_v1p1beta1 = "*"
-pykkachu = {version="*", index="pypi-test"}
 
 [requires]
 python_version = "3"

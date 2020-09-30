@@ -8,9 +8,7 @@ import secrets
 import pydub
 import io
 from playsound import playsound
-from google.cloud import speech_v1p1beta1
-from google.cloud.speech_v1p1beta1 import enums
-from google.cloud.speech_v1p1beta1 import types
+from google.cloud import speech_v1p1beta1 as speech
 
 
 class Capture:
@@ -30,7 +28,7 @@ class Capture:
         self.stream = None
         self.wf = None
 
-        self.client = speech_v1p1beta1.SpeechClient()
+        self.client = speech.SpeechClient()
         self.recording_index = 0
         self.task = sched.scheduler(time.time, time.sleep)
 
@@ -88,13 +86,14 @@ class Capture:
             self.again()
 
     def sample_recognize(self, file_path):
-        config = types.RecognitionConfig(
-            encoding=enums.RecognitionConfig.AudioEncoding.MP3,
-            sample_rate_hertz=self.RATE,
-            language_code='en-US',
-            enable_automatic_punctuation=True)
+        config = speech.RecognitionConfig({
+            'encoding': speech.RecognitionConfig.AudioEncoding.MP3,
+            'sample_rate_hertz': self.RATE,
+            'language_code': 'en-US',
+            'enable_automatic_punctuation': True
+        })
         with io.open(file_path, "rb") as f:
             content = f.read()
-        audio = {"content": content}
+        audio = speech.RecognitionAudio({"content": content})
 
-        return self.client.recognize(config, audio).results
+        return self.client.recognize(config=config, audio=audio).results

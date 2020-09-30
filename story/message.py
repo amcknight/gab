@@ -17,7 +17,6 @@ class Hear(Message):
 
 # Limbic
 
-
 class Go(Message):
     pass
 

@@ -5,8 +5,10 @@ from google.cloud import texttospeech
 
 client = texttospeech.TextToSpeechClient()
 
+
 def say(mp3):
     os.system("afplay " + mp3)
+
 
 def text_to_speech(text, lang_code, path):
     response = client.synthesize_speech(
