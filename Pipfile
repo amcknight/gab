@@ -3,11 +3,6 @@ name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
 
-[[source]]
-name = "pypi-test"
-url = "https://test.pypi.org/simple"
-verify_ssl = true
-
 [dev-packages]
 
 [packages]
@@ -19,7 +14,7 @@ playsound = "*"
 pyaudio = "*"
 pydub = "*"
 pykka = "*"
-pykkachu = {version="*", index="pypi-test"}
+pykkachu = "*"
 pynput = "*"
 pysm = "*"
 sounddevice = "*"
