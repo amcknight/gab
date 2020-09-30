@@ -11,6 +11,7 @@ Requires an OpenAI API key as an ENV var. If you use this, and you shouldn't bec
 - Combine common s2t and t2s functions
 - Clean up old .mp3s
 - Convert this To Do into a versioned Roadmap
+- Automatically cache text to speech requests to google
 ### Story
 - Complete the non-happy path options
 - Make it interruptable and restartable, especially by voice
@@ -21,10 +22,13 @@ Requires an OpenAI API key as an ENV var. If you use this, and you shouldn't bec
 
 # Changelog
 ### Unreleased
-  - Remove .wav files after .mp3s are created
-  - Refactored to the Actor Model
-  - Added Message classes
-  - Used dispatcher decorators, a directory, and a "Head" object to organize code
-  - Added a state machine for limbic
-  - Made the Worker into a Fleet called a Cortex
-  - Added logging
+- Remove .wav files after .mp3s are created
+- Refactored to the Actor Model
+- Added Message classes
+- Used dispatcher decorators, a directory, and a "Head" object to organize code
+- Added a state machine for limbic
+- Made the Worker into a Fleet called a Cortex
+- Added logging
+- Created a decorator for Events+State
+- Separated generic pykka extensions into a pykkachu file
+- Split out the generic pykka extension into a library and importing it
