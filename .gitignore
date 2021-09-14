@@ -1,6 +1,7 @@
 .idea
 venv
 gab.iml
+google-creds.json
 **/__pycache__
 **/.DS_Store
 story/input_audio

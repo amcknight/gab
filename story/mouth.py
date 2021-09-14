@@ -1,13 +1,13 @@
 import os
 import secrets
-
+from playsound import playsound
 from google.cloud import texttospeech
 
 client = texttospeech.TextToSpeechClient()
 
 
 def say(mp3):
-    os.system("afplay " + mp3)
+    playsound(mp3)
 
 
 def text_to_speech(text, lang_code, path):

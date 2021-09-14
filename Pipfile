@@ -19,6 +19,8 @@ pynput = "*"
 pysm = "*"
 sounddevice = "*"
 soundfile = "*"
+evdev = "*"
+pygobject = "*"
 
 [requires]
 python_version = "3"
