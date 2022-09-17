@@ -6,19 +6,22 @@ Requires an OpenAI API key as an ENV var. If you use this, and you shouldn't bec
 
 ## Install and Run
 
-1) You need python3 and pipenv.
-2) Clone the repo.
-3) Add a `.env` file in the root directory with the line `OPENAI_API_KEY=sk-XXXXX`, replacing XXXXX with your open api secret key. 
+1) You need python3 and pipenv
+2) Clone the repo
+3) Add a `.env` file in the root directory with the line `OPENAI_API_KEY=sk-YOUR_SECRET_KEY_FROM_OPEN_AI`
 4) Then run:
-```
-  pipenv install
-  pipenv run python3 gab
+```commandline
+pipenv install
 ```
 
 That should be it but if installation is failing, you may need:
-
-```
+```commandline
 pip3 install --upgrade openai playsound google-cloud-speech google-cloud-texttospeech pyaudio pydub pynput pysm pykka pykkachu sounddevice soundfile
+```
+
+Run it with:
+```commandline
+  pipenv run python3 gab
 ```
 
 
