@@ -9,6 +9,7 @@ Requires an OpenAI API key as an ENV var. If you use this, and you shouldn't bec
 Clone the repo then run:
 
 ```
+  pip3 install --upgrade openai playsound google-cloud-speech google-cloud-texttospeech pyaudio pydub pynput pysm pykka pykkachu sounddevice soundfile
   pipenv install
   pipenv run python3 gab
 ```

@@ -1,6 +1,7 @@
 
 import openai
 import sys
+import playsound as playsound
 from room.renderer import *
 from room.capture import *
 from pynput import keyboard
@@ -9,7 +10,6 @@ actions = ["ENTER", "EXIT"]
 cast = {}
 tokens = 100
 notMe = False
-
 log = []
 
 
@@ -106,6 +106,7 @@ def parse(res):
 
 def fart():
     playsound("room/resources/fart.mp3")
+
 
 def user_input(prefix):
     print(prefix)

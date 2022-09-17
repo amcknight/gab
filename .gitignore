@@ -1,6 +1,7 @@
 .idea
 venv
 gab.iml
+Pipfile.lockbackup
 google-creds.json
 **/__pycache__
 **/.DS_Store

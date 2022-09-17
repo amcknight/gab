@@ -76,7 +76,7 @@ class Capture:
 
             results = self.sample_recognize(self.output_name("mp3"))
             if len(results) == 0:
-                playsound("resources/ding.mp3")
+                playsound("room/resources/ding.mp3")
                 self.again()
             else:
                 for result in results:
