@@ -6,24 +6,33 @@ Requires an OpenAI API key as an ENV var. If you use this, and you shouldn't bec
 
 ## Install and Run
 
-Clone the repo then run:
+Clone the repo
 
+Add a `.env` file in the root directory with the line `OPENAI_API_KEY=sk-XXXXX`, replacing XXXXX with your open api secret key.
+
+Then run:
 ```
-  pip3 install --upgrade openai playsound google-cloud-speech google-cloud-texttospeech pyaudio pydub pynput pysm pykka pykkachu sounddevice soundfile
   pipenv install
   pipenv run python3 gab
 ```
-Then, uh, fix the errors until it works.
+
+That should be it but if installation is failing, you may need:
+
+```
+pip3 install --upgrade openai playsound google-cloud-speech google-cloud-texttospeech pyaudio pydub pynput pysm pykka pykkachu sounddevice soundfile
+```
 
 
 ## Roadmap
 ### v0.1
+- Move engine into env variable
 - Complete the non-happy path options in Story
 - Create a top-level menu for room, story, and any future options
 - Use grammarless speech to text for getting tags and yes-no answers
 - Combine common s2t and t2s functions
-- Clean up old .mp3s when exiting
+- Clean up old .mp3s and .wavs when exiting
 - Make Story able to continue indefinitely using maximum prompt length
+- Fix Room so if it is exitable in all situations without needing to kill the program
 - Fix the key capture (or remove the need for key capture) in Room
 ### Beyond
 - Be able to run in both text and voice mode

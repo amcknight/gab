@@ -5,4 +5,4 @@ Pipfile.lockbackup
 google-creds.json
 **/__pycache__
 **/.DS_Store
-story/input_audio
+story/input_audio/*

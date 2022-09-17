@@ -25,6 +25,7 @@ class Capture:
 
         self.capturing = False
         self.started = False
+        self.last_text = None
         self.stream = None
         self.wf = None
 
