@@ -4,6 +4,17 @@ A voice-based open-ended chatbot
 
 Requires an OpenAI API key as an ENV var. If you use this, and you shouldn't because it doesn't really work yet, then please take full responsibility under [OpenAI's usage guide](https://beta.openai.com/docs/going-live). The code will need to be modified to fulfill OpenAI's guidelines.
 
+## Install and Run
+
+Clone the repo then run:
+
+```
+  pipenv install
+  pipenv run python3 gab
+```
+Then, uh, fix the errors until it works.
+
+
 ## Roadmap
 ### v0.1
 - Complete the non-happy path options in Story
