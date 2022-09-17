@@ -27,9 +27,10 @@ Run it with:
 
 ## Roadmap
 ### v0.1
-- Move engine into env variable
+- Happy path for room and story modes should run without error
 - Complete the non-happy path options in Story
 - Create a top-level menu for room, story, and any future options
+- Move engine into env variable
 - Use grammarless speech to text for getting tags and yes-no answers
 - Combine common s2t and t2s functions
 - Clean up old .mp3s and .wavs when exiting
