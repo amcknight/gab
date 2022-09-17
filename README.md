@@ -6,11 +6,10 @@ Requires an OpenAI API key as an ENV var. If you use this, and you shouldn't bec
 
 ## Install and Run
 
-Clone the repo
-
-Add a `.env` file in the root directory with the line `OPENAI_API_KEY=sk-XXXXX`, replacing XXXXX with your open api secret key.
-
-Then run:
+1) You need python3 and pipenv.
+2) Clone the repo.
+3) Add a `.env` file in the root directory with the line `OPENAI_API_KEY=sk-XXXXX`, replacing XXXXX with your open api secret key. 
+4) Then run:
 ```
   pipenv install
   pipenv run python3 gab
