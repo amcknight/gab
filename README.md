@@ -24,7 +24,6 @@ Run it with:
   pipenv run python3 gab
 ```
 
-
 ## Roadmap
 ### v0.1
 - Happy path for room and story modes should run without error
