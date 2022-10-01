@@ -24,7 +24,7 @@ def parse():
 def run(mode):
     match mode:
         case 'listen':
-            listener.listen()
+            listener.multi_listen()
         case 'room':
             initial_lines = room.setup()
             room.chat(initial_lines)
