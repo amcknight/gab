@@ -28,24 +28,23 @@ Run it with:
 ### v0.1
 - Happy path for room and story modes should run without error
 - Complete the non-happy path options in Story
-- Create a top-level menu for room, story, and any future options
 - Move engine into env variable
 - Use grammarless speech to text for getting tags and yes-no answers
-- Combine common s2t and t2s functions
+- Combine common s2t and t2s functions across modes
 - Clean up old .mp3s and .wavs when exiting
 - Make Story able to continue indefinitely using maximum prompt length
 - Fix Room so if it is exitable in all situations without needing to kill the program
 - Fix the key capture (or remove the need for key capture) in Room
 ### Beyond
-- Be able to run in both text and voice mode
 - Get end-of-speech detection working
 - Automatically cache text to speech requests to google
 - Make it interruptable and restartable, especially by voice
 - Use multiple voices for menus vs characters
 
-
 ## Changelog
 ### Unreleased
+- Added a pure listen mode to check how voices are being interpreted
+- Added argparse for selecting mode from terminal
 - Remove .wav files after .mp3s are created
 - Refactored to the Actor Model
 - Added Message classes

@@ -84,15 +84,15 @@ class ResumableMicrophoneStream:
                         data.append(self.last_audio_input[i])
                 self.new_stream = False
 
-            # Use a blocking get() to ensure there's at least one chunk of
-            # data, and stop iteration if the chunk is None, indicating the
-            # end of the audio stream.
+            # Use a blocking get() to ensure there's at least one chunk of data, and stop iteration if the chunk is
+            # None, indicating the end of the audio stream.
             chunk = self._buff.get()
             self.audio_input.append(chunk)
 
             if chunk is None:
                 return
             data.append(chunk)
+
             # Now consume whatever other data's still buffered.
             while True:
                 try:
@@ -150,14 +150,9 @@ def listen_print_loop(responses, stream):
 
         stream.result_end_time = int((result_seconds * 1000) + (result_micros / 1000))
 
-        corrected_time = (
-            stream.result_end_time
-            - stream.bridging_offset
-            + (STREAMING_LIMIT * stream.restart_counter)
-        )
-        # Display interim results, but with a carriage return at the end of the
-        # line, so subsequent lines will overwrite them.
+        corrected_time = stream.result_end_time - stream.bridging_offset + (STREAMING_LIMIT * stream.restart_counter)
 
+        # Display interim results with a carriage return at the end of line, so subsequent lines will overwrite them.
         if result.is_final:
             sys.stdout.write(GREEN)
             sys.stdout.write("\033[K")
@@ -166,8 +161,7 @@ def listen_print_loop(responses, stream):
             stream.is_final_end_time = stream.result_end_time
             stream.last_transcript_was_final = True
 
-            # Exit recognition if any of the transcribed phrases could be
-            # one of our keywords.
+            # Exit recognition if any of the transcribed phrases could be one of our keywords.
             if re.search(r"\b(exit|quit)\b", transcript, re.I):
                 sys.stdout.write(YELLOW)
                 sys.stdout.write("Exiting...\n")
@@ -182,7 +176,7 @@ def listen_print_loop(responses, stream):
             stream.last_transcript_was_final = False
 
 
-def main():
+def listen():
     """start bidirectional streaming from microphone input to speech API"""
 
     client = speech.SpeechClient()

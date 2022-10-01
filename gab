@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import logging
+import argparse
 from room import room
 from story.head import Head
 from multitest import multi
@@ -11,16 +12,21 @@ if __name__ == "__main__":
     logging.getLogger('pykka').setLevel(logging.INFO)
     logging.getLogger('openai').setLevel(logging.WARN)
 
-    # Story
-    # Head().run()
+    modes = "story|room|multi|listen"
 
-    # Room
-    # initial_lines = room.setup()
-    # room.chat(initial_lines)
-
-    # Multi
-    # m = multi.Multi()
-    # print(m.speech_to_text())
-
-    # Listen
-    listener.main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("mode", help="the mode to run. One of: "+modes)
+    args = parser.parse_args()
+    match args.mode:
+        case 'listen':
+            listener.listen()
+        case 'story':
+            Head().run()
+        case 'multi':
+            m = multi.Multi()
+            print(m.speech_to_text())
+        case 'room':
+            initial_lines = room.setup()
+            room.chat(initial_lines)
+        case _:
+            print('unknown mode. Use: '+modes)
