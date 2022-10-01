@@ -1,9 +1,8 @@
 import re
 import sys
 import time
-import pyaudio
 from google.cloud import speech
-from six.moves import queue
+from listen.mic_streams import ResumableMicrophoneStream
 
 # Audio recording parameters
 STREAMING_LIMIT = 4*60*1000
@@ -13,98 +12,6 @@ CHUNK_SIZE = int(SAMPLE_RATE / 10)  # 100ms
 RED = "\033[0;31m"
 GREEN = "\033[0;32m"
 YELLOW = "\033[0;33m"
-
-
-class ResumableMicrophoneStream:
-    """Opens a recording stream as a generator yielding the audio chunks."""
-
-    def __init__(self, rate, chunk_size):
-        self._rate = rate
-        self.chunk_size = chunk_size
-        self._num_channels = 1
-        self._buff = queue.Queue()
-        self.closed = True
-        self.start_time = now()
-        self.restart_counter = 0
-        self.audio_input = []
-        self.last_audio_input = []
-        self.result_end_time = 0
-        self.is_final_end_time = 0
-        self.final_request_end_time = 0
-        self.bridging_offset = 0
-        self.last_transcript_was_final = False
-        self.new_stream = True
-        self._audio_interface = pyaudio.PyAudio()
-        self._audio_stream = self._audio_interface.open(
-            format=pyaudio.paInt16,
-            channels=self._num_channels,
-            rate=self._rate,
-            input=True,
-            frames_per_buffer=self.chunk_size,
-            # Run the audio stream asynchronously to fill the buffer object. This is necessary so that the input
-            # device's buffer doesn't overflow while the calling thread makes network requests, etc.
-            stream_callback=self._fill_buffer,
-        )
-
-    def __enter__(self):
-        self.closed = False
-        return self
-
-    def __exit__(self, type_, value, traceback):
-        self._audio_stream.stop_stream()
-        self._audio_stream.close()
-        self.closed = True
-        # Signal the generator to terminate so that the client's
-        # streaming_recognize method will not block the process termination.
-        self._buff.put(None)
-        self._audio_interface.terminate()
-
-    def _fill_buffer(self, in_data, *args, **kwargs):
-        """Continuously collect data from the audio stream, into the buffer."""
-
-        self._buff.put(in_data)
-        return None, pyaudio.paContinue
-
-    def generator(self):
-        """Stream Audio from microphone to API and to local buffer"""
-
-        while not self.closed:
-            data = []
-            if self.new_stream and self.last_audio_input:
-                len_last_input = len(self.last_audio_input)
-                chunk_time = STREAMING_LIMIT / len_last_input
-                if chunk_time != 0:
-                    if self.bridging_offset < 0:
-                        self.bridging_offset = 0
-                    if self.bridging_offset > self.final_request_end_time:
-                        self.bridging_offset = self.final_request_end_time
-                    chunks_from_ms = round((self.final_request_end_time - self.bridging_offset) / chunk_time)
-                    self.bridging_offset = round((len_last_input - chunks_from_ms) * chunk_time)
-                    for i in range(chunks_from_ms, len_last_input):
-                        data.append(self.last_audio_input[i])
-                self.new_stream = False
-
-            # Use a blocking get() to ensure there's at least one chunk of data, and stop iteration if the chunk is
-            # None, indicating the end of the audio stream.
-            chunk = self._buff.get()
-            self.audio_input.append(chunk)
-
-            if chunk is None:
-                return
-            data.append(chunk)
-
-            # Now consume whatever other data's still buffered.
-            while True:
-                try:
-                    chunk = self._buff.get(block=False)
-                    if chunk is None:
-                        return
-                    data.append(chunk)
-                    self.audio_input.append(chunk)
-                except queue.Empty:
-                    break
-
-            yield b"".join(data)
 
 
 def now():
@@ -123,17 +30,13 @@ def listen_print_loop(responses, stream):
     feed at the end of it, to allow the next result to overwrite it, until the response is a final one. For the final
     one, print a newline to preserve the finalized transcription.
     """
-
     for response in responses:
         if now() - stream.start_time > STREAMING_LIMIT:
             stream.start_time = now()
             break
-
         if not response.results:
             continue
-
         result = response.results[0]
-
         if not result.alternatives:
             continue
 
@@ -178,7 +81,6 @@ def listen_print_loop(responses, stream):
 
 def listen():
     """start bidirectional streaming from microphone input to speech API"""
-
     client = speech.SpeechClient()
     config = speech.RecognitionConfig(
         encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
@@ -189,8 +91,7 @@ def listen():
     )
     streaming_config = speech.StreamingRecognitionConfig(config=config, interim_results=True)
 
-    mic_manager = ResumableMicrophoneStream(SAMPLE_RATE, CHUNK_SIZE)
-    print(mic_manager.chunk_size)
+    mic_manager = ResumableMicrophoneStream(SAMPLE_RATE, CHUNK_SIZE, STREAMING_LIMIT, now())
     sys.stdout.write(YELLOW)
     sys.stdout.write('\nListening, say "Quit" or "Exit" to stop.\n\n')
     sys.stdout.write("End (ms)       Transcript Results/Status\n")
@@ -208,7 +109,6 @@ def listen():
                 speech.StreamingRecognizeRequest(audio_content=content)
                 for content in audio_generator
             )
-
             responses = client.streaming_recognize(streaming_config, requests)
 
             # Now, put the transcription responses to use.
