@@ -4,29 +4,40 @@ import logging
 import argparse
 from room import room
 from story.head import Head
-from multitest import multi
+from wip import multi
 from listen import listener
+
+
+def parse():
+    modes = ['listen', 'room', 'story', 'wip']
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("mode", help="the mode to run. One of: " + '|'.join(modes))
+    args = parser.parse_args()
+    if args.mode in modes:
+        return args.mode
+    else:
+        print('unknown mode. Use: ' + '|'.join(modes))
+        exit(1)
+
+
+def run(mode):
+    match mode:
+        case 'listen':
+            listener.listen()
+        case 'room':
+            initial_lines = room.setup()
+            room.chat(initial_lines)
+        case 'story':
+            Head().run()
+        case 'wip':
+            m = multi.Multi()
+            print(m.speech_to_text())
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.WARN)
     logging.getLogger('pykka').setLevel(logging.INFO)
     logging.getLogger('openai').setLevel(logging.WARN)
 
-    modes = "story|room|multi|listen"
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("mode", help="the mode to run. One of: "+modes)
-    args = parser.parse_args()
-    match args.mode:
-        case 'listen':
-            listener.listen()
-        case 'story':
-            Head().run()
-        case 'multi':
-            m = multi.Multi()
-            print(m.speech_to_text())
-        case 'room':
-            initial_lines = room.setup()
-            room.chat(initial_lines)
-        case _:
-            print('unknown mode. Use: '+modes)
+    run(parse())

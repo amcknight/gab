@@ -1,12 +1,12 @@
 import io
-from multitest import ear
+from wip import ear
 import sounddevice as sd
 from google.cloud import speech_v1p1beta1 as speechtotext
 
 
 class Multi:
     def __init__(self):
-        # self.mp3Path = './multitest/conversation.mp3'
+        # self.mp3Path = './wip/conversation.mp3'
         # self.client = speechtotext.SpeechClient()
 
         audio = ear.FlacAudioStream()

@@ -21,8 +21,9 @@ pip3 install --upgrade openai playsound google-cloud-speech google-cloud-texttos
 
 Run it with:
 ```commandline
-  pipenv run python3 gab
+  pipenv run python3 gab MODE
 ```
+Modes are listen, room, and story. You can also make `gab` executable and just use `./gab MODE`.
 
 ## Roadmap
 ### v0.1
