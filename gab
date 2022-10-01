@@ -4,6 +4,7 @@ import logging
 from room import room
 from story.head import Head
 from multitest import multi
+from listen import listener
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.WARN)
@@ -18,6 +19,8 @@ if __name__ == "__main__":
     # room.chat(initial_lines)
 
     # Multi
-    m = multi.Multi()
+    # m = multi.Multi()
     # print(m.speech_to_text())
 
+    # Listen
+    listener.main()

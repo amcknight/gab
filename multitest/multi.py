@@ -1,6 +1,5 @@
 import io
 from multitest import ear
-from multitest import example
 import sounddevice as sd
 from google.cloud import speech_v1p1beta1 as speechtotext
 
@@ -10,11 +9,9 @@ class Multi:
         # self.mp3Path = './multitest/conversation.mp3'
         # self.client = speechtotext.SpeechClient()
 
-        # audio = ear.FlacAudioStream()
-        # audio.stream.start()
-        # audio.listen()
-
-        example.main()
+        audio = ear.FlacAudioStream()
+        audio.stream.start()
+        audio.listen()
 
     def speech_to_text(self):
         config = speechtotext.RecognitionConfig({
