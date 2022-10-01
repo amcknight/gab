@@ -21,6 +21,8 @@ sounddevice = "*"
 soundfile = "*"
 evdev = "*"
 pygobject = "*"
+pyflac = "*"
+termcolor = "*"
 
 [requires]
 python_version = "3"

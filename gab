@@ -11,13 +11,13 @@ if __name__ == "__main__":
     logging.getLogger('openai').setLevel(logging.WARN)
 
     # Story
-    Head().run()
+    # Head().run()
 
     # Room
     # initial_lines = room.setup()
     # room.chat(initial_lines)
 
     # Multi
-    # m = multi.Multi()
+    m = multi.Multi()
     # print(m.speech_to_text())
 
