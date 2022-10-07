@@ -6,9 +6,9 @@ class ResumableMicrophoneStream:
     """Opens a recording stream as a generator yielding the audio chunks."""
 
     def __init__(self, rate, chunk_size, streaming_limit, start_time):
-        self._rate = rate
+        self.rate = rate
         self.chunk_size = chunk_size
-        self._num_channels = 1
+        self.channels = 1
         self._buff = queue.Queue()
         self.closed = True
         self.start_time = start_time
@@ -23,10 +23,12 @@ class ResumableMicrophoneStream:
         self.last_transcript_was_final = False
         self.new_stream = True
         self._audio_interface = pyaudio.PyAudio()
+        self.format = pyaudio.paInt16
+        self.sample_width = self._audio_interface.get_sample_size(self.format)
         self._audio_stream = self._audio_interface.open(
-            format=pyaudio.paInt16,
-            channels=self._num_channels,
-            rate=self._rate,
+            format=self.format,
+            channels=self.channels,
+            rate=self.rate,
             input=True,
             frames_per_buffer=self.chunk_size,
             # Run the audio stream asynchronously to fill the buffer object. This is necessary so that the input

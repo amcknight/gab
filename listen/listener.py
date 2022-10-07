@@ -1,12 +1,15 @@
 import re
 import sys
+import tempfile
+
 import time
+import wave
 from google.cloud import speech
 from listen.mic_streams import ResumableMicrophoneStream
 
 # Audio recording parameters
 STREAMING_LIMIT = 4*60*1000
-SAMPLE_RATE = 16000
+SAMPLE_RATE = 44100
 CHUNK_SIZE = int(SAMPLE_RATE / 10)  # 100ms
 
 RED = "\033[0;31m"
@@ -45,7 +48,9 @@ def multi_listen():
         sample_rate_hertz=SAMPLE_RATE,
         language_code="en-US",
         max_alternatives=1,
+        enable_automatic_punctuation=True,
         diarization_config=diarization_config,
+        model="video"
     )
     streaming_config = speech.StreamingRecognitionConfig(config=config, interim_results=True)
     listen_with(streaming_config, multi_print_loop)
@@ -59,7 +64,10 @@ def listen_with(streaming_config, print_loop):
     sys.stdout.write("End (ms)       Transcript Results/Status\n")
     sys.stdout.write("=====================================================\n")
 
-    with mic_manager as stream:
+    filename = tempfile.mktemp(prefix='temp_', suffix='.wav', dir='')
+
+    with mic_manager as stream, wave.open(filename, 'wb') as wav:
+        _configure_wave_file(wav, mic_manager)
         while not stream.closed:
             sys.stdout.write(YELLOW)
             sys.stdout.write("\n" + str(STREAMING_LIMIT * stream.restart_counter) + ": NEW REQUEST\n")
@@ -67,9 +75,12 @@ def listen_with(streaming_config, print_loop):
             stream.audio_input = []
             audio_generator = stream.generator()
 
+            def do_stuff(content):
+                wav.writeframes(content)
+                return speech.StreamingRecognizeRequest(audio_content=content)
+
             requests = (
-                speech.StreamingRecognizeRequest(audio_content=content)
-                for content in audio_generator
+                do_stuff(content) for content in audio_generator
             )
             responses = client.streaming_recognize(streaming_config, requests)
 
@@ -215,3 +226,9 @@ def multi_print_loop(responses, stream):
             sys.stdout.write(speaker + "> " + str(corrected_time) + ": " + transcript + "\r")
 
             stream.last_transcript_was_final = False
+
+
+def _configure_wave_file(wav, mic_manager):
+    wav.setnchannels(mic_manager.channels)
+    wav.setsampwidth(mic_manager.sample_width)
+    wav.setframerate(mic_manager.rate)

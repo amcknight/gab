@@ -25,23 +25,6 @@ Run it with:
 ```
 Modes are listen, room, and story. You can also make `gab` executable and just use `./gab MODE`.
 
-## Roadmap
-### v0.1
-- Happy path for room and story modes should run without error
-- Complete the non-happy path options in Story
-- Move engine into env variable
-- Use grammarless speech to text for getting tags and yes-no answers
-- Combine common s2t and t2s functions across modes
-- Clean up old .mp3s and .wavs when exiting
-- Make Story able to continue indefinitely using maximum prompt length
-- Fix Room so if it is exitable in all situations without needing to kill the program
-- Fix the key capture (or remove the need for key capture) in Room
-### Beyond
-- Get end-of-speech detection working
-- Automatically cache text to speech requests to google
-- Make it interruptable and restartable, especially by voice
-- Use multiple voices for menus vs characters
-
 ## Changelog
 ### Unreleased
 - Added a pure listen mode to check how voices are being interpreted
@@ -56,3 +39,21 @@ Modes are listen, room, and story. You can also make `gab` executable and just u
 - Created a decorator for Events+State
 - Separated generic pykka extensions into a pykkachu file
 - Split out the generic pykka extension into a library and importing it
+
+## Roadmap
+### v0.1
+- Create an enriched text stream that tags each word with time, avg volume, direction, etc
+- Happy path for room and story modes should run without error
+- Complete the non-happy path options in Story
+- Move engine into env variable
+- Use grammarless speech to text for getting tags and yes-no answers
+- Combine common s2t and t2s functions across modes
+- Clean up old .mp3s and .wavs when exiting
+- Make Story able to continue indefinitely using maximum prompt length
+- Fix Room so if it is exitable in all situations without needing to kill the program
+- Fix the key capture (or remove the need for key capture) in Room
+### Beyond
+- Get end-of-speech detection working
+- Automatically cache text to speech requests to google
+- Make it interruptable and restartable, especially by voice
+- Use multiple voices for menus vs characters
